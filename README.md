@@ -41,7 +41,7 @@ truffle test
 ## Running the decentralized web application
 
 ```
-npm run dev
+npm run start
 ```
 
 Then visit :  http://localhost:3000/
@@ -52,8 +52,6 @@ Adbelhamid Bakhta
 Karim Taam
 
 Ludovic Maréchal
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
 ## License
 
