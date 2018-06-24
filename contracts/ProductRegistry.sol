@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 import "./Traceable.sol";
 
@@ -17,11 +17,18 @@ contract ProductRegistry {
 
   /**
   * @dev Record a new product in the registry.
+  * @param _id id of the product
   */
-  function addProduct(bytes32 _id) public nonZeroBytes32(_id){
+  function addProduct(bytes32 _id)
+    public
+    nonZeroBytes32(_id)
+  {
     require(products[_id] == address(0x0));
+    //create new contract
     Traceable traceable = new Traceable(_id);
+    //add to whitelist the sender
     traceable.addAllowedModifier(msg.sender);
+    //register this product
     products[_id] = traceable;
     emit LogNewProductRecorded(_id,traceable);
   }
@@ -38,8 +45,8 @@ contract ProductRegistry {
   /**
   * @dev Throws if zero
   */
-  modifier nonZeroBytes32(bytes32 value){
-      require(value != bytes32(0));
+  modifier nonZeroBytes32(bytes32 _value){
+      require(_value != bytes32(0));
       _;
   }
 }
