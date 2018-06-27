@@ -21,7 +21,7 @@ class App extends Component {
       history:[],
       inputProductId: '',
       inputProductAddress: '',
-      inputPositionTimestamp: '',
+      inputTimestampPosition: '',
       inputLatitudePosition: 0,
       inputLongitudePosition: 0,
       web3: null
@@ -88,7 +88,7 @@ class App extends Component {
     if(this.state.inputProductAddress!==null && this.state.inputProductAddress!==""){
       return <form onSubmit={this.handleSubmit}>
         <label>
-          Add Position : &nbsp; <input type="date" name="inputPositionTimestamp" value={this.state.inputPositionTimestamp}
+          Add Position : &nbsp; <input type="date" name="inputTimestampPosition" value={this.state.inputTimestampPosition}
            onChange={this.handleHistoricalPositionChange.bind(this)}/>
         </label>
         <label>
@@ -134,7 +134,8 @@ class App extends Component {
   handleProductInformationChange(event) {
     this.setState({
       inputProductId: event.target.value,
-      inputProductAddress: ""
+      inputProductAddress: "",
+      history: []
     })
   }
 
@@ -158,7 +159,9 @@ class App extends Component {
         return productRegistryInstance.getProductAddress.call(inputProductId, accounts[0])
       }).then((result) => {
         // Update state with the result.
-        return this.setState({ inputProductAddress: result })
+        return this.setState({
+           inputProductAddress: result
+          })
       })
     })
   }
@@ -176,7 +179,7 @@ class App extends Component {
     }).then((result) => {
       // Update state with the result.
       this.setState({ inputProductAddress: result })
-      this.displayTimeline()
+      this.updateTimeline()
     })
   }
 
@@ -203,20 +206,31 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       traceable.at(traceableAddress).then((instance) => {
         traceableInstance = instance
-        // add new product.
-
-        var timestamp = new Date(this.state.inputPositionTimestamp).getTime()/1000;
+        // add new history step.
+        var timestamp = new Date(this.state.inputTimestampPosition).getTime()/1000;
         var latitude = this.state.inputLatitudePosition*1000000;
         var longitude = this.state.inputLongitudePosition*1000000;
         return traceableInstance.addStep(timestamp,latitude,longitude, {from: accounts[0]})
+      }).then((result) => {
+        this.listenNewPositionAddedEvent(traceableInstance)
       })
     })
   }
 
-  displayTimeline() {
+  listenNewPositionAddedEvent(contractTraceableInstance){
+    var event = contractTraceableInstance.LogNewPositionAdded();
+    event.watch((err, result) => {
+            event.stopWatching()
+            if (err) {
+              console.log('could not get event LogNewPositionAdded()')
+            } else {
+              this.updateTimeline()
+            }
+    })
+  }
 
+  updateTimeline() {
     this.state.history = []
-
     var traceableAddress = this.state.inputProductAddress;
 
     const contract = require('truffle-contract')

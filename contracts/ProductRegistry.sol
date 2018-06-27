@@ -49,4 +49,5 @@ contract ProductRegistry {
       require(_value != bytes32(0));
       _;
   }
+
 }

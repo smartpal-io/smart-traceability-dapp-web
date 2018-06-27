@@ -94,6 +94,7 @@ contract Traceable is Whitelist {
       constant
       returns (uint256, int256, int256)
     {
+        require(_index>=0 && _index<historicalPositions.length);
         Position storage step = historicalPositions[_index];
         return (step.timestamp, step.latitude, step.longitude);
     }
